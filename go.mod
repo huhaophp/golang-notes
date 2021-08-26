@@ -1,3 +1,3 @@
-module golang-notes
+module note
 
-go 1.15
+go 1.16
