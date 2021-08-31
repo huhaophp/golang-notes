@@ -1,9 +1,12 @@
 package main
 
 import (
-	t "note/struct"
+	"fmt"
+	t "note/structure"
 )
 
 func main() {
-	t.Demo()
+	queue := t.NewQueue()
+	queue.Push(1)
+	fmt.Println(queue.Len())
 }
