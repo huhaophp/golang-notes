@@ -1,9 +1,9 @@
 package main
 
 import (
-	"note/slice"
+	t "note/struct"
 )
 
 func main() {
-	slice.Demo()
+	t.Demo()
 }
