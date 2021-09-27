@@ -1,12 +1,7 @@
 package main
 
-import (
-	"fmt"
-	t "note/structure"
-)
+import "note/mongodb"
 
 func main() {
-	queue := t.NewQueue()
-	queue.Push(1)
-	fmt.Println(queue.Len())
+	mongodb.Run()
 }
