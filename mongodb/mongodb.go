@@ -15,7 +15,8 @@ func Run() {
 	InitMongodb()
 	DoInsert()
 	DoSelect()
-	DoDelete()
+	//DoDelete()
+	DoUpdate()
 }
 
 var client *mongo.Client
@@ -23,6 +24,7 @@ var client *mongo.Client
 func InitMongodb() {
 	// 设置客户端连接配置
 	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
+	clientOptions.SetMaxPoolSize(50)
 	// 连接到MongoDB
 	var err error
 	client, err = mongo.Connect(context.TODO(), clientOptions)
@@ -42,6 +44,7 @@ type UserEntity struct {
 	Age      int                `bson:"age"`
 }
 
+// DoSelect 查询操作
 func DoSelect() {
 	filter := bson.D{{}}
 	// 查询单条数据
@@ -76,6 +79,7 @@ func DoSelect() {
 	fmt.Println(users)
 }
 
+// DoInsert 插入操作
 func DoInsert() {
 	user := UserEntity{Username: "bom", Age: 22}
 	// one insert
@@ -83,16 +87,17 @@ func DoInsert() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("insert result id: %v", InsertOneRes.InsertedID)
+	fmt.Printf("insert result id: %v \n", InsertOneRes.InsertedID)
 	// batch insert
-	users := []interface{}{UserEntity{Username: "li3", Age: 22}, UserEntity{Username: "li3", Age: 22}}
+	users := []interface{}{UserEntity{Username: "li3", Age: 22}, UserEntity{Username: "li4", Age: 22}}
 	InsertManyRes, err := client.Database("homestead").Collection("users").InsertMany(context.TODO(), users)
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("insert result ids: %v", InsertManyRes.InsertedIDs)
+	fmt.Printf("insert result ids: %v \n", InsertManyRes.InsertedIDs)
 }
 
+// DoDelete 删除操作
 func DoDelete() {
 	//idPrimitive, err := primitive.ObjectIDFromHex("6151e2613e9ec078ce8d76ef")
 	//if err != nil {
@@ -101,7 +106,7 @@ func DoDelete() {
 	// bson.D{{"_id",idPrimitive}}
 
 	// del one
-	DeleteOneRes, err := client.Database("homestead").Collection("users").DeleteOne(context.TODO(), bson.D{{"nickname","bom"}})
+	DeleteOneRes, err := client.Database("homestead").Collection("users").DeleteOne(context.TODO(), bson.D{{"nickname", "bom"}})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -115,6 +120,26 @@ func DoDelete() {
 	fmt.Printf("Deleted %v documents\n", DeleteManyRes.DeletedCount)
 }
 
+// DoUpdate 更新操作
 func DoUpdate() {
+	filter := bson.D{{"nickname", "bom"}}
+	update := bson.D{
+		{"$inc", bson.D{
+			{"age", 1},
+		}},
+	}
 
+	// UpdateOne
+	updateOneResult, err := client.Database("homestead").Collection("users").UpdateOne(context.TODO(), filter, update)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("update one success %v \n", updateOneResult.ModifiedCount)
+
+	// UpdateMany
+	UpdateManyResult, err := client.Database("homestead").Collection("users").UpdateMany(context.TODO(), filter, update)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("update many success %v \n", UpdateManyResult.ModifiedCount)
 }
